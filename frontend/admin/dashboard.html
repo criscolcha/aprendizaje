@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Panel Administrador</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+:root{
+--azul:#003366;
+--amarillo:#f2c200;
+--gris:#f4f6f9;
+}
+body{
+background:var(--gris);
+font-family:Arial;
+margin:0;
+}
+.header{
+    position:fixed;
+    top:0;
+    right:0;
+    left:240px;
+    height:60px;
+    z-index:1000;
+    display:flex;
+    justify-content:flex-end;
+}
+/* USER */
+.user{
+background:#f4f6f9;
+border:none;
+padding:6px 12px;
+border-radius:20px;
+font-weight:bold;
+color:#003366;
+}
+.dropdown-menu{
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+/* SIDEBAR */
+.sidebar{
+height:100vh;
+width:240px;
+position:fixed;
+background:var(--azul);
+color:white;
+padding:20px;
+}
+.sidebar h2{
+color:var(--amarillo);
+margin-bottom:30px;
+}
+.sidebar button{
+width:100%;
+margin-bottom:10px;
+background:transparent;
+border:1px solid var(--amarillo);
+color:white;
+padding:10px;
+border-radius:6px;
+}
+.sidebar button:hover{
+background:var(--amarillo);
+color:black;
+}
+.content{
+    margin-left:260px;
+    padding:90px 30px 30px 30px; /* espacio para header fijo */
+}
+/* TARJETAS */
+.card-materia{
+background:white;
+border-radius:10px;
+padding:20px;
+box-shadow:0 4px 10px rgba(0,0,0,0.1);
+margin-bottom:20px;
+}
+.card-materia h5{
+color:var(--azul);
+}
+/* BOTONES */
+.btn-editar{
+background:var(--amarillo);
+border:none;
+}
+.btn-eliminar{
+background:#dc3545;
+color:white;
+border:none;
+}
+.btn-guardar{
+background:var(--azul);
+color:white;
+border:none;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+<div class="dropdown">
+<button class="btn dropdown-toggle user" type="button" data-bs-toggle="dropdown" id="usuarioNombre">👤 Cargando...</button>
+<ul class="dropdown-menu dropdown-menu-end">
+<li><a class="dropdown-item text-danger" href="#" onclick="logout()">Cerrar sesión</a></li>
+</ul>
+</div>
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>Panel Admin</h2>
+<button onclick="mostrarSeccion('crear')">Crear Materia</button>
+<button onclick="mostrarSeccion('materias')">Ver Materias</button>
+</div>
+
+<!-- CONTENIDO -->
+<div class="content">
+<h1>Panel Administrador</h1>
+
+<!-- CREAR MATERIA -->
+<div id="crear">
+<h3 class="mt-4">Nueva Materia</h3>
+<form id="formMateria">
+<div class="mb-3">
+<label>Nombre</label>
+<input id="nombre" class="form-control">
+</div>
+<div class="mb-3">
+<label>Descripción</label>
+<input id="descripcion" class="form-control">
+</div>
+<button class="btn btn-guardar">Crear Materia</button>
+</form>
+</div>
+
+<!-- LISTA MATERIAS -->
+<div id="materias" style="display:none">
+<h3 class="mt-4">Materias Registradas</h3>
+<div id="listaMaterias" class="row"></div>
+</div>
+
+<!-- CONTENIDO -->
+<div id="contenidoMateria" style="display:none">
+<h3 id="tituloMateria"></h3>
+<h4 class="mt-4">Agregar Contenido</h4>
+<form id="formContenido">
+<input type="hidden" id="cursoId">
+<div class="mb-2">
+<input id="tituloContenido" class="form-control" placeholder="Título">
+</div>
+<div class="mb-2">
+<select id="tipoContenido" class="form-control">
+<option value="video">Video</option>
+<option value="pdf">PDF</option>
+<option value="link">Link</option>
+<option value="libro">Libro</option>
+</select>
+</div>
+<div class="mb-2">
+<input id="urlContenido" class="form-control" placeholder="URL del contenido">
+</div>
+<select id="unidadContenido" class="form-control mb-2" required>
+<option value="">Seleccionar unidad</option>
+</select>
+<button class="btn btn-guardar">Agregar Contenido</button>
+</form>
+
+<h4 class="mt-4">Contenido de la materia</h4>
+<div id="listaContenido"></div>
+</div>
+
+<!-- MODAL AGREGAR EJERCICIOS -->
+<div class="modal fade" id="modalEjercicios" tabindex="-1" aria-labelledby="modalEjerciciosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEjerciciosLabel">Ejercicios</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEjercicio">
+          <input type="hidden" id="contenidoIdModal">
+          <div class="mb-2">
+            <input id="tituloEjercicio" class="form-control" placeholder="Título del ejercicio">
+          </div>
+          <div class="mb-2">
+            <textarea id="enunciadoEjercicio" class="form-control" placeholder="Enunciado"></textarea>
+          </div>
+          <div class="mb-2">
+            <select id="tipoEjercicio" class="form-control">
+              <option value="opcion_multiple">Opción múltiple</option>
+              <option value="verdadero_falso">Verdadero/Falso</option>
+              <option value="respuesta_corta">Respuesta corta</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <input id="opcionesEjercicio" class="form-control" placeholder="Opciones separadas por coma">
+          </div>
+          <div class="mb-2">
+            <input id="respuestaEjercicio" class="form-control" placeholder="Respuesta correcta">
+          </div>
+          <button type="submit" class="btn btn-guardar">Agregar Ejercicio</button>
+        </form>
+        <hr>
+        <div id="listaEjerciciosModal"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR EJERCICIO -->
+<div class="modal fade" id="modalEditarEjercicio" tabindex="-1" aria-labelledby="modalEditarEjercicioLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalEditarEjercicioLabel">Editar Ejercicio</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editarEjercicioId">
+        <div class="mb-2">
+          <input id="editarTituloEjercicio" class="form-control" placeholder="Título del ejercicio">
+        </div>
+        <div class="mb-2">
+          <textarea id="editarEnunciadoEjercicio" class="form-control" placeholder="Enunciado"></textarea>
+        </div>
+        <div class="mb-2">
+          <select id="editarTipoEjercicio" class="form-control">
+            <option value="opcion_multiple">Opción múltiple</option>
+            <option value="verdadero_falso">Verdadero/Falso</option>
+            <option value="respuesta_corta">Respuesta corta</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <input id="editarOpcionesEjercicio" class="form-control" placeholder="Opciones separadas por coma">
+        </div>
+        <div class="mb-2">
+          <input id="editarRespuestaEjercicio" class="form-control" placeholder="Respuesta correcta">
+        </div>
+        <button class="btn btn-guardar" onclick="guardarEjercicioModal()">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* 🔐 PROTECCIÓN ADMIN */
+const token = localStorage.getItem("token")
+const role = localStorage.getItem("role")
+if(!token || role!=="admin"){ window.location.href="/login.html" }
+
+/* 👤 USUARIO */
+const email = localStorage.getItem("nombreUsuario")
+let nombre = email ? email.split("@")[0].charAt(0).toUpperCase()+email.split("@")[0].slice(1) : "Invitado"
+document.getElementById("usuarioNombre").innerHTML = "👤 " + nombre
+function logout(){ localStorage.clear(); window.location.href="/login.html"; }
+
+/* API */
+const API="http://localhost:3000/api/courses"
+const API_CONTENT="http://localhost:3000/api/content"
+const API_EXERCISES="http://localhost:3000/api/exercises"
+
+/* UNIDADES */
+const selectUnidad = document.getElementById("unidadContenido");
+for(let i=1;i<=10;i++){
+  const option = document.createElement("option");
+  option.value = `Unidad ${i}`;
+  option.textContent = `Unidad ${i}`;
+  selectUnidad.appendChild(option);
+}
+
+/* SECCIONES */
+function mostrarSeccion(sec){
+  document.getElementById("crear").style.display="none";
+  document.getElementById("materias").style.display="none";
+  document.getElementById("contenidoMateria").style.display="none";
+  document.getElementById(sec).style.display="block";
+  if(sec==="materias") cargarMaterias();
+}
+
+/* CREAR MATERIA */
+document.getElementById("formMateria").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const nombre=document.getElementById("nombre").value;
+  const descripcion=document.getElementById("descripcion").value;
+  await fetch(API+"/crear",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({nombre,descripcion})});
+  alert("Materia creada");
+  document.getElementById("formMateria").reset();
+})
+
+/* LISTAR MATERIAS */
+async function cargarMaterias(){
+  const res = await fetch(API);
+  const materias = await res.json();
+  const lista = document.getElementById("listaMaterias");
+  lista.innerHTML="";
+  materias.forEach(m=>{
+    lista.innerHTML+=`
+    <div class="col-md-4">
+      <div class="card-materia">
+        <div id="vista-${m._id}">
+          <h5>${m.nombre}</h5>
+          <p>${m.descripcion}</p>
+          <button class="btn btn-editar btn-sm" onclick="mostrarEditar('${m._id}')">Editar</button>
+          <button class="btn btn-eliminar btn-sm" onclick="eliminarMateria('${m._id}')">Eliminar</button>
+          <button class="btn btn-primary btn-sm" onclick="abrirContenido('${m._id}','${m.nombre}')">Contenido</button>
+        </div>
+        <div id="editar-${m._id}" style="display:none">
+          <input id="nombre-${m._id}" class="form-control mb-2" value="${m.nombre}">
+          <input id="desc-${m._id}" class="form-control mb-2" value="${m.descripcion}">
+          <button class="btn btn-guardar btn-sm" onclick="guardarEdicion('${m._id}')">Guardar</button>
+          <button class="btn btn-secondary btn-sm" onclick="cancelarEditar('${m._id}')">Cancelar</button>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+/* EDITAR / CANCELAR */
+function mostrarEditar(id){document.getElementById("vista-"+id).style.display="none"; document.getElementById("editar-"+id).style.display="block";}
+function cancelarEditar(id){document.getElementById("vista-"+id).style.display="block"; document.getElementById("editar-"+id).style.display="none";}
+async function guardarEdicion(id){
+  const nombre=document.getElementById("nombre-"+id).value;
+  const descripcion=document.getElementById("desc-"+id).value;
+  await fetch(API+"/editar/"+id,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({nombre,descripcion})});
+  cargarMaterias();
+}
+
+/* ELIMINAR */
+async function eliminarMateria(id){if(!confirm("Eliminar materia?")) return; await fetch(API+"/eliminar/"+id,{method:"DELETE"}); cargarMaterias();}
+
+/* CONTENIDO */
+function abrirContenido(id,nombre){
+  document.getElementById("crear").style.display="none";
+  document.getElementById("materias").style.display="none";
+  document.getElementById("contenidoMateria").style.display="block";
+  document.getElementById("tituloMateria").innerText="Contenido de "+nombre;
+  document.getElementById("cursoId").value=id;
+  cargarContenido(id);
+}
+
+/* AGREGAR CONTENIDO */
+document.getElementById("formContenido").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  if(!selectUnidad.value){alert("Selecciona una unidad"); return;}
+  const titulo=document.getElementById("tituloContenido").value;
+  const tipo=document.getElementById("tipoContenido").value;
+  const url=document.getElementById("urlContenido").value;
+  const curso=document.getElementById("cursoId").value;
+  const unidad=selectUnidad.value;
+  await fetch(API_CONTENT+"/agregar",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({titulo,tipo,url,curso,unidad})});
+  alert("Contenido agregado");
+  document.getElementById("formContenido").reset();
+  cargarContenido(curso);
+})
+
+/* CARGAR CONTENIDO */
+async function cargarContenido(id){
+  const res = await fetch(API_CONTENT+"/"+id);
+  const contenidos = await res.json();
+  const lista = document.getElementById("listaContenido");
+  lista.innerHTML="";
+  contenidos.sort((a,b)=>parseInt(a.unidad.split(" ")[1])-parseInt(b.unidad.split(" ")[1]));
+  if(contenidos.length===0){ lista.innerHTML="<p>No hay contenido aún</p>"; return;}
+  contenidos.forEach(c=>{
+    lista.innerHTML+=`
+    <div class="card-materia">
+      <h6>📘 ${c.unidad} - ${c.titulo}</h6>
+      <p>Tipo: ${c.tipo}</p>
+      <a href="${c.url}" target="_blank">Ver contenido</a>
+      <button class="btn btn-primary btn-sm mt-1" onclick="abrirEjerciciosModal('${c._id}','${c.titulo}')">Ejercicios</button>
+    </div>`;
+  });
+}
+
+/* MODAL EJERCICIOS */
+async function abrirEjerciciosModal(contenidoId,tituloContenido){
+  document.getElementById("contenidoIdModal").value=contenidoId;
+  document.getElementById("modalEjerciciosLabel").innerText="Ejercicios: "+tituloContenido;
+  const modal=new bootstrap.Modal(document.getElementById("modalEjercicios"));
+  modal.show();
+  cargarEjercicios(contenidoId);
+}
+
+async function cargarEjercicios(contenidoId){
+  const lista=document.getElementById("listaEjerciciosModal");
+  lista.innerHTML="";
+  try{
+    const res=await fetch(`${API_EXERCISES}/${contenidoId}`);
+    if(!res.ok){ lista.innerHTML="<p>No hay ejercicios aún</p>"; return;}
+    const ejercicios=await res.json();
+    if(ejercicios.length===0){ lista.innerHTML="<p>No hay ejercicios aún</p>"; return;}
+    ejercicios.forEach(e=>{
+      lista.innerHTML+=`
+      <div class="card-materia mb-2 p-2">
+        <h6>📝 ${e.titulo}</h6>
+        <p>${e.enunciado}</p>
+        <p>Tipo: ${e.tipo}</p>
+        ${e.opciones && e.opciones.length ? "<p>Opciones: "+e.opciones.join(", ")+"</p>":""}
+        <p>Respuesta correcta: ${e.respuesta}</p>
+        <button class="btn btn-editar btn-sm" onclick="abrirEditarEjercicio('${e._id}')">Editar</button>
+        <button class="btn btn-eliminar btn-sm" onclick="eliminarEjercicio('${e._id}', '${contenidoId}')">Eliminar</button>
+      </div>`;
+    });
+  }catch(err){console.error(err); lista.innerHTML="<p>Error al cargar ejercicios</p>";}
+}
+
+/* AGREGAR EJERCICIO */
+document.getElementById("formEjercicio").addEventListener("submit", async(e)=>{
+  e.preventDefault();
+  const contenido=document.getElementById("contenidoIdModal").value;
+  const titulo=document.getElementById("tituloEjercicio").value;
+  const enunciado=document.getElementById("enunciadoEjercicio").value;
+  const tipo=document.getElementById("tipoEjercicio").value;
+  const opciones=document.getElementById("opcionesEjercicio").value.split(",").map(o=>o.trim());
+  const respuesta=document.getElementById("respuestaEjercicio").value;
+  await fetch(`${API_EXERCISES}/agregar`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({titulo,enunciado,tipo,opciones,respuesta,contenido})
+  });
+  alert("Ejercicio agregado");
+  document.getElementById("formEjercicio").reset();
+  cargarEjercicios(contenido);
+})
+
+/* MODAL EDITAR EJERCICIO */
+function abrirEditarEjercicio(id){
+  const modal = new bootstrap.Modal(document.getElementById("modalEditarEjercicio"));
+  document.getElementById("editarEjercicioId").value=id;
+  fetch(`${API_EXERCISES}/ver/${id}`).then(res=>res.json()).then(e=>{
+    document.getElementById("editarTituloEjercicio").value=e.titulo;
+    document.getElementById("editarEnunciadoEjercicio").value=e.enunciado;
+    document.getElementById("editarTipoEjercicio").value=e.tipo;
+    document.getElementById("editarOpcionesEjercicio").value=e.opciones.join(",");
+    document.getElementById("editarRespuestaEjercicio").value=e.respuesta;
+    modal.show();
+  });
+}
+
+async function guardarEjercicioModal(){
+  const id=document.getElementById("editarEjercicioId").value;
+  const titulo=document.getElementById("editarTituloEjercicio").value;
+  const enunciado=document.getElementById("editarEnunciadoEjercicio").value;
+  const tipo=document.getElementById("editarTipoEjercicio").value;
+  const opciones=document.getElementById("editarOpcionesEjercicio").value.split(",").map(o=>o.trim());
+  const respuesta=document.getElementById("editarRespuestaEjercicio").value;
+  await fetch(`${API_EXERCISES}/editar/${id}`,{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({titulo,enunciado,tipo,opciones,respuesta})
+  });
+  alert("Ejercicio actualizado");
+  const contenidoId=document.getElementById("contenidoIdModal").value;
+  cargarEjercicios(contenidoId);
+  bootstrap.Modal.getInstance(document.getElementById("modalEditarEjercicio")).hide();
+}
+
+/* ELIMINAR EJERCICIO */
+async function eliminarEjercicio(id, contenidoId){
+  if(!confirm("Eliminar ejercicio?")) return;
+  await fetch(`${API_EXERCISES}/eliminar/${id}`,{method:"DELETE"});
+  cargarEjercicios(contenidoId);
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

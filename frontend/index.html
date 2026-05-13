@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma Estudiantil</title>
+
+<style>
+
+/* colores institucionales */
+:root{
+--azul:#0B3C8A;
+--azul-oscuro:#072A63;
+--amarillo:#F2C94C;
+--blanco:#ffffff;
+}
+
+/* cuerpo */
+body{
+margin:0;
+font-family: Arial, Helvetica, sans-serif;
+background: linear-gradient(135deg,var(--azul),#1e6fd9);
+min-height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+/* encabezado */
+header{
+background:var(--azul-oscuro);
+color:white;
+text-align:center;
+padding:20px;
+font-size:28px;
+font-weight:bold;
+letter-spacing:1px;
+box-shadow:0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* contenedor principal */
+.main{
+display:flex;
+flex:1;
+}
+
+/* lado izquierdo */
+.left{
+width:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.left img{
+width:70%;
+border-radius:20px;
+box-shadow:0 20px 40px rgba(0,0,0,0.25);
+}
+
+/* lado derecho */
+.right{
+width:50%;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+/* tarjeta login */
+.container{
+background:var(--blanco);
+padding:45px;
+border-radius:18px;
+text-align:center;
+box-shadow:0 20px 40px rgba(0,0,0,0.2);
+width:340px;
+}
+
+.subtitle{
+color:#555;
+font-size:15px;
+margin-bottom:25px;
+}
+
+/* botones */
+.btn{
+display:block;
+text-decoration:none;
+padding:13px;
+margin:12px 0;
+border-radius:8px;
+font-size:16px;
+font-weight:bold;
+transition:0.3s;
+}
+
+/* botón login */
+.login{
+background:var(--azul);
+color:white;
+}
+
+.login:hover{
+background:var(--azul-oscuro);
+transform:translateY(-2px);
+}
+
+/* botón registro */
+.register{
+background:var(--amarillo);
+color:#333;
+}
+
+.register:hover{
+background:#e3b73f;
+transform:translateY(-2px);
+}
+
+/* footer */
+footer{
+text-align:center;
+padding:12px;
+color:white;
+font-size:14px;
+background:rgba(0,0,0,0.2);
+}
+
+/* responsive */
+@media (max-width:900px){
+
+.main{
+flex-direction:column;
+}
+
+.left{
+width:100%;
+height:40vh;
+}
+
+.right{
+width:100%;
+height:60vh;
+}
+
+.left img{
+width:65%;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+PLATAFORMA DE APRENDIZAJE "EDUDESARROLLO"
+</header>
+
+<div class="main">
+
+<div class="left">
+<img src="img/e-learning.jpg" alt="E-learning">
+</div>
+
+<div class="right">
+
+<div class="container">
+<h1>Plataforma Estudiantil</h1>
+<p class="subtitle">Unidad Educativa Simón Bolívar</p>
+
+<a href="login.html" class="btn login">Iniciar sesión</a>
+<a href="register.html" class="btn register">Crear cuenta</a>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+© 2026 Plataforma Estudiantil | Autor: Dubraska Colcha
+</footer>
+
+</body>
+</html>

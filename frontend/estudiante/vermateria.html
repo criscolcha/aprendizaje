@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Contenido de la materia</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+:root{
+  --azul:#003366;
+  --azul-sec:#0a4c8a;
+  --amarillo:#f2c200;
+  --gris:#f4f6f9;
+  --blanco:#ffffff;
+}
+
+body{
+  background:var(--gris);
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin:0;
+}
+
+/* HEADER */
+.header{
+  background:var(--azul);
+  color:white;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:3px solid var(--amarillo);
+}
+
+.header h1{
+  font-size:20px;
+  margin:0;
+  font-weight:600;
+}
+
+/* STATS */
+.stats{
+  display:flex;
+  gap:15px;
+  padding:15px 30px;
+}
+
+.stat-card{
+  background:white;
+  padding:15px 20px;
+  border-radius:10px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+  flex:1;
+  text-align:center;
+}
+
+.stat-card h3{
+  margin:0;
+  color:var(--azul);
+}
+
+.stat-card p{
+  margin:0;
+  font-size:13px;
+  color:gray;
+}
+
+/* CONTENEDOR PRINCIPAL */
+.main-box{
+  background:white;
+  margin:20px auto;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.08);
+  max-width:950px;
+}
+
+/* TITULO MATERIA */
+.titulo-materia{
+  font-size:22px;
+  font-weight:bold;
+  color:var(--azul);
+  margin-bottom:5px;
+}
+
+.subtitulo{
+  color:gray;
+  font-size:14px;
+  margin-bottom:20px;
+}
+
+/* BOTÓN BACK */
+.btn-back{
+  background: var(--amarillo);
+  color: black;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* ACORDEON */
+.accordion-item{
+  border:none;
+  margin-bottom:10px;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+.accordion-button{
+  background:var(--azul);
+  color:white;
+  font-weight:600;
+}
+
+.accordion-button:not(.collapsed){
+  background:var(--azul-sec);
+}
+
+/* TARJETAS */
+.contenido-card{
+  background:#fafafa;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  transition:0.2s;
+  border-left:5px solid var(--amarillo);
+}
+
+.contenido-card:hover{
+  background:white;
+  transform:translateY(-2px);
+}
+
+.info h5{
+  margin:0;
+  font-size:15px;
+}
+
+.tipo{
+  font-size:12px;
+  color:gray;
+}
+
+/* BOTÓN */
+.btn-custom{
+  background:var(--azul);
+  border:none;
+  color:white;
+  font-size:13px;
+  padding:6px 12px;
+  border-radius:6px;
+}
+
+/* ICONO */
+.icono{
+  margin-right:8px;
+}
+
+/* VENTANA EJERCICIOS */
+#ventanaEjercicio {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:9999;
+  justify-content:center;
+  align-items:center;
+}
+
+#ventanaEjercicio > div {
+  background:white;
+  padding:25px;
+  border-radius:12px;
+  max-width:600px;
+  width:90%;
+  position:relative;
+  box-shadow:0 5px 20px rgba(0,0,0,0.3);
+}
+
+#ventanaEjercicio span {
+  position:absolute;
+  top:10px; right:15px;
+  cursor:pointer;
+  font-size:22px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+<h1>📚 Plataforma Educativa</h1>
+<button onclick="history.back()" class="btn-back">⬅️ Regresar</button>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+<div class="stat-card">
+<h3 id="totalContenidos">0</h3>
+<p>Contenidos</p>
+</div>
+<div class="stat-card">
+<h3 id="totalUnidades">0</h3>
+<p>Unidades</p>
+</div>
+</div>
+
+<!-- CONTENIDO -->
+<div class="main-box">
+<div class="titulo-materia" id="tituloMateria">Materia</div>
+<div class="subtitulo">Explora el contenido organizado por unidades</div>
+<div id="contenidos"></div>
+</div>
+
+<!-- VENTANA EJERCICIOS -->
+<div id="ventanaEjercicio">
+  <div>
+    <span onclick="cerrarVentana()">✖️</span>
+    <div id="ejercicioActual"></div>
+    <button id="btnSiguiente" class="btn btn-warning mt-2">Siguiente ➡️</button>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search)
+const id = params.get("id")
+
+async function cargarContenido(){
+  const res = await fetch("http://localhost:3000/api/content/"+id)
+  const contenidos = await res.json()
+  const contenedor = document.getElementById("contenidos")
+  contenedor.innerHTML=""
+
+  const agrupado = {}
+  if(!Array.isArray(contenidos)) return
+
+  contenidos.forEach(c=>{
+    const unidad = c.unidad || "Sin unidad"
+    if(!agrupado[unidad]) agrupado[unidad] = []
+    agrupado[unidad].push(c)
+  })
+
+  document.getElementById("totalContenidos").innerText = contenidos.length
+  document.getElementById("totalUnidades").innerText = Object.keys(agrupado).length
+
+  let html = ""
+  let index = 0
+
+  for(let unidad in agrupado){
+    html += `
+      <div class="accordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${index}">
+              📘 ${unidad}
+            </button>
+          </h2>
+          <div id="collapse${index}" class="accordion-collapse collapse">
+            <div class="accordion-body">
+    `
+
+    for(let c of agrupado[unidad]){
+      let icono="📄"
+      if(c.tipo==="video") icono="🎥"
+      if(c.tipo==="pdf") icono="📄"
+      if(c.tipo==="link") icono="🔗"
+      if(c.tipo==="libro") icono="📚"
+
+      html += `
+        <div class="contenido-card">
+          <div class="info">
+            <h5><span class="icono">${icono}</span>${c.titulo}</h5>
+            <p class="tipo">${c.tipo}</p>
+          </div>
+          <div>
+            <a href="${c.url}" target="_blank">
+              <button class="btn btn-custom btn-sm">Abrir</button>
+            </a>
+            <button class="btn btn-primary btn-sm" onclick="abrirEjercicios('${c._id}')">📝 Ver Ejercicios</button>
+          </div>
+        </div>
+      `
+    }
+
+    html += `</div></div></div></div>`
+    index++
+  }
+
+  contenedor.innerHTML = html
+}
+
+let ejerciciosGlobal = []
+let indexEjercicio = 0
+let totalCorrectas = 0
+let totalEjercicios = 0
+
+async function abrirEjercicios(contenidoId){
+  const res = await fetch(`http://localhost:3000/api/exercises/${contenidoId}`)
+  if(!res.ok) return alert("No hay ejercicios disponibles")
+  ejerciciosGlobal = await res.json()
+  if(ejerciciosGlobal.length===0) return alert("No hay ejercicios disponibles")
+
+  indexEjercicio = 0
+  totalCorrectas = 0
+  totalEjercicios = ejerciciosGlobal.length
+
+  mostrarEjercicio(indexEjercicio)
+  document.getElementById("ventanaEjercicio").style.display="flex"
+}
+
+function mostrarEjercicio(idx){
+  const e = ejerciciosGlobal[idx]
+  if(!e) return
+
+  let html = `<h6>📝 ${e.titulo}</h6><p>${e.enunciado}</p><div id="opciones-${e._id}">`
+
+  if(e.tipo==="opcion_multiple"){
+    e.opciones.forEach((opt,i)=>{
+      html += `<div class="form-check">
+        <input class="form-check-input" type="radio" name="ej-${e._id}" value="${opt}">
+        <label class="form-check-label">${opt}</label>
+      </div>`
+    })
+  } else if(e.tipo==="verdadero_falso"){
+    html += `<div class="form-check">
+      <input class="form-check-input" type="radio" name="ej-${e._id}" value="Verdadero">
+      <label class="form-check-label">Verdadero</label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" name="ej-${e._id}" value="Falso">
+      <label class="form-check-label">Falso</label>
+    </div>`
+  } else if(e.tipo==="respuesta_corta"){
+    html += `<input type="text" id="respuesta-${e._id}" class="form-control" placeholder="Escribe tu respuesta">`
+  }
+
+  html += `</div>
+    <button class="btn btn-success mt-2" id="btnEnviar">✅ Enviar</button>
+    <p id="resultado-${e._id}" style="margin-top:10px;font-weight:bold;"></p>`
+
+  document.getElementById("ejercicioActual").innerHTML = html
+
+  document.getElementById("btnEnviar").onclick = ()=>{
+    const correcto = verificarRespuestaModal(e._id, e.respuesta)
+    if(correcto) totalCorrectas++
+    document.getElementById("btnSiguiente").disabled = false
+  }
+
+  const btnSiguiente = document.getElementById("btnSiguiente")
+  btnSiguiente.disabled = true
+  btnSiguiente.style.display = "inline-block"
+  btnSiguiente.onclick = ()=>{
+    indexEjercicio++
+    if(indexEjercicio < ejerciciosGlobal.length){
+      mostrarEjercicio(indexEjercicio)
+    } else {
+      document.getElementById("ejercicioActual").innerHTML = `
+        <h4>📊 Resumen de resultados</h4>
+        <p>Total de ejercicios: ${totalEjercicios}</p>
+        <p>Respuestas correctas: ${totalCorrectas}</p>
+        <p>Respuestas incorrectas: ${totalEjercicios - totalCorrectas}</p>
+        <button class="btn btn-primary mt-2" onclick="cerrarVentana()">Cerrar</button>
+      `
+      btnSiguiente.style.display = "none"
+    }
+  }
+}
+
+function verificarRespuestaModal(ejId, correcta){
+  let resUsuario
+  const radio = document.querySelector(`input[name="ej-${ejId}"]:checked`)
+  if(radio) resUsuario = radio.value
+  else {
+    const text = document.getElementById(`respuesta-${ejId}`)
+    if(text) resUsuario = text.value.trim()
+  }
+
+  const resultado = document.getElementById(`resultado-${ejId}`)
+  if(!resUsuario){
+    resultado.innerText = "Por favor selecciona o escribe una respuesta"
+    resultado.style.color="red"
+    return false
+  }
+
+  if(resUsuario.toLowerCase()===correcta.toLowerCase()){
+    resultado.innerText="✔️ Correcto!"
+    resultado.style.color="green"
+    return true
+  } else {
+    resultado.innerText=`❌ Incorrecto. La respuesta correcta es: ${correcta}`
+    resultado.style.color="red"
+    return false
+  }
+}
+
+function cerrarVentana(){
+  document.getElementById("ventanaEjercicio").style.display="none"
+  document.getElementById("btnSiguiente").style.display = "inline-block"
+}
+
+cargarContenido()
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

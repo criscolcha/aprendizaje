@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Plataforma</title>
+
+<style>
+
+/* colores institucionales */
+:root{
+--azul:#0B3C8A;
+--azul-oscuro:#072A63;
+--amarillo:#F2C94C;
+}
+
+/* fondo */
+body{
+margin:0;
+font-family: Arial, Helvetica, sans-serif;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(135deg,var(--azul),#1e6fd9);
+}
+
+/* tarjeta login */
+.container{
+background:white;
+padding:40px;
+border-radius:15px;
+box-shadow:0 15px 35px rgba(0,0,0,0.2);
+width:320px;
+text-align:center;
+}
+
+/* titulo */
+h2{
+margin-bottom:25px;
+color:var(--azul);
+}
+
+/* inputs */
+input{
+width:100%;
+padding:12px;
+margin:10px 0;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:14px;
+}
+
+/* botón ingresar */
+.login-btn{
+width:100%;
+padding:12px;
+margin-top:10px;
+background:var(--azul);
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.login-btn:hover{
+background:var(--azul-oscuro);
+}
+
+/* botón volver */
+.back-btn{
+display:block;
+margin-top:15px;
+padding:10px;
+background:var(--amarillo);
+color:#333;
+text-decoration:none;
+border-radius:8px;
+font-weight:bold;
+transition:0.3s;
+}
+
+.back-btn:hover{
+background:#e3b73f;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Iniciar Sesión</h2>
+
+<form id="loginForm">
+
+<input id="email" type="email" placeholder="Correo electrónico" required>
+
+<input id="password" type="password" placeholder="Contraseña" required>
+
+<button class="login-btn">Ingresar</button>
+
+</form>
+
+<a href="index.html" class="back-btn">← Volver al inicio</a>
+
+</div>
+
+<script>
+
+document.getElementById("loginForm")
+.addEventListener("submit", async (e) => {
+
+e.preventDefault()
+
+const email = document.getElementById("email").value
+const password = document.getElementById("password").value
+
+console.log("Intentando login con:", email)
+
+try{
+
+const res = await fetch("http://localhost:3000/api/auth/login", {
+method: "POST",
+headers: {
+"Content-Type": "application/json"
+},
+body: JSON.stringify({ email, password })
+})
+
+const data = await res.json()
+
+console.log("Datos recibidos:", data)
+
+if(data.token){
+
+localStorage.setItem("token", data.token)
+localStorage.setItem("role", data.role)
+
+/* 👇 NUEVO: guardar nombre del usuario */
+localStorage.setItem("nombreUsuario", email)
+
+if(data.role === "admin"){
+window.location.href = "/admin/dashboard.html"
+}else{
+window.location.href = "/estudiante/dashboard.html"
+}
+
+}else{
+alert("Correo o contraseña incorrectos")
+}
+
+}catch(error){
+
+console.error(error)
+alert("Error al conectar con el servidor")
+
+}
+
+})
+
+</script>
+
+</body>
+</html>

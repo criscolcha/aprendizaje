@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro - Plataforma</title>
+
+<style>
+
+/* colores institucionales */
+:root{
+--azul:#0B3C8A;
+--azul-oscuro:#072A63;
+--amarillo:#F2C94C;
+}
+
+/* fondo */
+body{
+margin:0;
+font-family: Arial, Helvetica, sans-serif;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background: linear-gradient(135deg,var(--azul),#1e6fd9);
+}
+
+/* tarjeta */
+.container{
+background:white;
+padding:40px;
+border-radius:15px;
+box-shadow:0 15px 35px rgba(0,0,0,0.2);
+width:330px;
+text-align:center;
+}
+
+/* titulo */
+h2{
+margin-bottom:25px;
+color:var(--azul);
+}
+
+/* inputs */
+input, select{
+width:100%;
+padding:12px;
+margin:10px 0;
+border:1px solid #ccc;
+border-radius:8px;
+font-size:14px;
+}
+
+/* botón registrar */
+.register-btn{
+width:100%;
+padding:12px;
+margin-top:10px;
+background:var(--azul);
+color:white;
+border:none;
+border-radius:8px;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.register-btn:hover{
+background:var(--azul-oscuro);
+}
+
+/* botón volver */
+.back-btn{
+display:block;
+margin-top:15px;
+padding:10px;
+background:var(--amarillo);
+color:#333;
+text-decoration:none;
+border-radius:8px;
+font-weight:bold;
+transition:0.3s;
+}
+
+.back-btn:hover{
+background:#e3b73f;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Registro de Usuario</h2>
+
+<form id="registroForm">
+
+<input id="nombre" placeholder="Nombre completo" required>
+
+<input id="email" type="email" placeholder="Correo electrónico" required>
+
+<input id="password" type="password" placeholder="Contraseña" required>
+
+<select id="rol">
+<option value="estudiante">Estudiante</option>
+<option value="admin">Administrador</option>
+</select>
+
+<button type="submit" class="register-btn">Registrarse</button>
+
+</form>
+
+<a href="index.html" class="back-btn">← Volver al inicio</a>
+
+</div>
+
+<script>
+
+document.getElementById("registroForm")
+.addEventListener("submit", async (e)=>{
+
+e.preventDefault()
+
+const data = {
+
+nombre:document.getElementById("nombre").value,
+email:document.getElementById("email").value,
+password:document.getElementById("password").value,
+rol:document.getElementById("rol").value
+
+}
+
+try{
+
+const res = await fetch("http://localhost:3000/api/auth/register",{
+
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+
+})
+
+if(res.ok){
+alert("Usuario creado correctamente")
+window.location.href="login.html"
+}else{
+alert("Error al registrar usuario")
+}
+
+}catch(error){
+
+console.error(error)
+alert("Error al conectar con el servidor")
+
+}
+
+})
+
+</script>
+
+</body>
+</html>
