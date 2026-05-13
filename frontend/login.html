@@ -142,16 +142,17 @@ localStorage.setItem("token", data.token)
 localStorage.setItem("role", data.role)
 
 /* 👇 NUEVO: guardar nombre del usuario */
+localStorage.setItem("token", data.token)
+
+const rolUsuario = data.rol || data.role
+
+localStorage.setItem("role", rolUsuario)
 localStorage.setItem("nombreUsuario", email)
 
-if(data.rol === "admin"){
-window.location.href = "/admin/dashboard.html"
-}else{
-window.location.href = "/estudiante/dashboard.html"
-}
-
-}else{
-alert("Correo o contraseña incorrectos")
+if (rolUsuario === "admin") {
+  window.location.href = "/admin/dashboard.html"
+} else {
+  window.location.href = "/estudiante/dashboard.html"
 }
 
 }catch(error){
