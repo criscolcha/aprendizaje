@@ -122,7 +122,7 @@ const password = document.getElementById("password").value
 
 console.log("Intentando login con:", email)
 
-try{
+try {
 
 const res = await fetch("/api/auth/login", {
 method: "POST",
@@ -138,24 +138,29 @@ console.log("Datos recibidos:", data)
 
 if(data.token){
 
-localStorage.setItem("token", data.token)
-localStorage.setItem("role", data.role)
-
-/* 👇 NUEVO: guardar nombre del usuario */
-localStorage.setItem("token", data.token)
-
 const rolUsuario = data.rol || data.role
 
+localStorage.setItem("token", data.token)
 localStorage.setItem("role", rolUsuario)
 localStorage.setItem("nombreUsuario", email)
 
 if (rolUsuario === "admin") {
-  window.location.href = "/admin/dashboard.html"
+
+window.location.href = "/admin/dashboard.html"
+
 } else {
-  window.location.href = "/estudiante/dashboard.html"
+
+window.location.href = "/estudiante/dashboard.html"
+
 }
 
-}catch(error){
+} else {
+
+alert("Correo o contraseña incorrectos")
+
+}
+
+} catch(error){
 
 console.error(error)
 alert("Error al conectar con el servidor")
