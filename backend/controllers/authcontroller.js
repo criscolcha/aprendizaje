@@ -1,51 +1,45 @@
-const User = require("../models/User")
-const bcrypt = require("bcryptjs")
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
 exports.register = async (req, res) => {
+  const { nombre, email, password, rol } = req.body;
 
-const {email,password,role} = req.body
+  try {
+    const hash = await bcrypt.hash(password, 10);
 
-try{
+    const user = new User({
+      nombre,
+      email,
+      password: hash,
+      rol
+    });
 
-const hash = await bcrypt.hash(password,10)
+    await user.save();
 
-const user = new User({
-email,
-password:hash,
-role
-})
+    res.json({ msg: "Usuario creado" });
+  } catch (err) {
+    console.error("Error al registrar:", err);
+    res.status(500).json({ msg: "Error al registrar usuario", error: err.message });
+  }
+};
 
-await user.save()
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
 
-res.json({msg:"Usuario creado"})
+  const user = await User.findOne({ email });
 
-}catch(err){
+  if (!user) {
+    return res.status(400).json({ msg: "Usuario no existe" });
+  }
 
-res.status(500).json(err)
+  const valid = await bcrypt.compare(password, user.password);
 
-}
+  if (!valid) {
+    return res.status(400).json({ msg: "Contraseña incorrecta" });
+  }
 
-}
-
-exports.login = async (req,res)=>{
-
-const {email,password} = req.body
-
-const user = await User.findOne({email})
-
-if(!user){
-return res.status(400).json({msg:"Usuario no existe"})
-}
-
-const valid = await bcrypt.compare(password,user.password)
-
-if(!valid){
-return res.status(400).json({msg:"Contraseña incorrecta"})
-}
-
-res.json({
-token:"token",
-role:user.rol
-})
-
-}
+  res.json({
+    token: "token",
+    rol: user.rol
+  });
+};
