@@ -144,7 +144,7 @@ localStorage.setItem("role", data.role)
 /* 👇 NUEVO: guardar nombre del usuario */
 localStorage.setItem("nombreUsuario", email)
 
-if(data.role === "admin"){
+if(data.rol === "admin"){
 window.location.href = "/admin/dashboard.html"
 }else{
 window.location.href = "/estudiante/dashboard.html"
