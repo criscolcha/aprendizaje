@@ -219,7 +219,7 @@ let materiasGlobal = []
 
 async function cargarMaterias(){
 
-const res = await fetch("http://localhost:3000/api/courses")
+const res = await fetch("/api/courses")
 const materias = await res.json()
 
 materiasGlobal = materias

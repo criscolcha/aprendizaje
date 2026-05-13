@@ -234,7 +234,7 @@ const params = new URLSearchParams(window.location.search)
 const id = params.get("id")
 
 async function cargarContenido(){
-  const res = await fetch("http://localhost:3000/api/content/"+id)
+  const res = await fetch("/api/content/"+id)
   const contenidos = await res.json()
   const contenedor = document.getElementById("contenidos")
   contenedor.innerHTML=""
@@ -303,7 +303,7 @@ let totalCorrectas = 0
 let totalEjercicios = 0
 
 async function abrirEjercicios(contenidoId){
-  const res = await fetch(`http://localhost:3000/api/exercises/${contenidoId}`)
+  const res = await fetch(`/api/exercises/${contenidoId}`)
   if(!res.ok) return alert("No hay ejercicios disponibles")
   ejerciciosGlobal = await res.json()
   if(ejerciciosGlobal.length===0) return alert("No hay ejercicios disponibles")
